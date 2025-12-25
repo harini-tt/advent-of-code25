@@ -1,37 +1,42 @@
-import heapq
 import tqdm
+from collections import deque
+
 with open('input.in', 'r') as file:
     lines = file.readlines()
 
 total = 0
 for l in tqdm.tqdm(lines):
     parsed = l.strip().split()
+    if not parsed:
+        continue
     target = parsed[-1][1:-1]
-    target = list(map(int, target.split(',')))
-    target = tuple(target)
+    target = tuple(map(int, target.split(',')))
     k = len(target)
-    # print(target)
 
     deltas = []
     for button in parsed[1:-1]:
+        inside = button[1:-1].strip()
+        if inside == "":
+            continue
         delta = [0] * k
-        idxs = list(map(int, button[1:-1].split(',')))
+        idxs = list(map(int, inside.split(',')))
         for idx in idxs:
             delta[idx] = 1
         deltas.append(tuple(delta))
-    # print(deltas)
 
     start = tuple(0 for _ in range(k))
-    # dijkstra
-    pq = [(0, start)]
-    best = {start: 0}
-    while pq:
-        cost, state = heapq.heappop(pq)
-        if cost != best.get(state, None):
-            continue
+
+    q = deque([start])
+    dist = {start: 0}
+
+    while q:
+        state = q.popleft()
+        cost = dist[state]
+
         if state == target:
             total += cost
             break
+
         for delta in deltas:
             nxt = []
             ok = True
@@ -43,9 +48,10 @@ for l in tqdm.tqdm(lines):
                 nxt.append(v)
             if not ok:
                 continue
+
             nxt = tuple(nxt)
-            ncost = cost + 1
-            if ncost < best.get(nxt, 10**30):
-                best[nxt] = ncost
-                heapq.heappush(pq, (ncost, nxt))
+            if nxt not in dist:
+                dist[nxt] = cost + 1
+                q.append(nxt)
+
 print(total)
