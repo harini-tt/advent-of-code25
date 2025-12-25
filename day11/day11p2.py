@@ -27,11 +27,9 @@ def count_paths(g, start, target):
             return 1
         if u in memo:
             return memo[u]
-        if u in visiting:
-            raise ValueError("Cycle detected (not a DAG).")
         visiting.add(u)
         total = 0
-        for v in g.get(u, []):
+        for v in g[u]:
             total += dfs(v)
         visiting.remove(u)
         memo[u] = total
